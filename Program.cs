@@ -1,128 +1,489 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using ListString = System.Collections.Generic.List<string>;
 
-namespace ConsoleApp
+namespace ConsoleApp1
 {
-    public class TypeA
+    internal sealed class aTypeA1
     {
-        public int i;
+        private int x = 5;
     }
 
-    public class TypeB : TypeA
+    internal sealed class TypeB1
     {
-        public int j;
-    }
-    public sealed class SomeType
-    { // 1
-      // Nested class
-        private class SomeNestedType { } // 2
-
-        // Constant, read-only, and static read/write field
-        private const Int32 c_SomeConstant = 1; // 3
-        private readonly String m_SomeReadOnlyField = "2"; // 4
-        private static Int32 s_SomeReadWriteField = 3; // 5
-
-        // Type constructor
-        static SomeType() { } // 6
-
-        // Instance constructors
-        public SomeType(Int32 x) { } // 7
-        public SomeType() { } // 8
-
-        // Instance and static methods
-        private String InstanceMethod() { return null; } // 9
-
-        // Instance property
-        public Int32 SomeProp
-        { // 11
-            get { return 0; } // 12
-            set { } // 13
-        }
-        // Instance parameterful property (indexer)
-        public Int32 this[String s]
-        { // 14
-            get { return 0; } // 15
-            set { } // 16
-        }
-        // Instance event
-        public event EventHandler SomeEvent; // 17
-    }
-
-    public class MyTypeA { }
-    internal class MyTypeB { }
-    class MyTypeC { }
-
-    public static class MyTypeStaticA
-    {
-        public static void AStaticMethod() { }
-        public static int Number
+        static TypeB1()
         {
-            get { return number; }
-            set { number = value; }
+            // ...
         }
-
-        private static int number;
     }
 
-    public class MyTypeA2
+    public sealed class TypeC1
     {
-        public const int i = 10;
+        public static TypeC1 operator +(TypeC1 a, TypeC1 b)
+        {
+            TypeC1 c = new TypeC1();
+            c.x = a.x + b.x;
+            return c;
+        }
+
+        public int x { get; set; }
     }
 
-    public class MyTypeA3
+    public sealed class TypeD1
     {
-        public readonly int i;
-        public MyTypeA3()
+        public TypeD1(TypeC1 c)
         {
-            i = 10;
-
+            y = c.x;
         }
 
-        private int j;
+        public TypeD1() { }
 
-        public void Method1()
+        public static implicit operator TypeD1(int x)
         {
-            j = 20;
+            TypeD1 d1 = new TypeD1();
+            d1.y = x;
+            return d1;
+        }
+
+        public static explicit operator Int32(TypeD1 d)
+        {
+            return d.y;
+        }
+
+        public int y { get; set; }
+    }
+
+    public static class StringExtension
+    {
+        public static string GetCheetCode(this String s)
+        {
+            string str = "Papa Piche => Edith, Lisa et Maggie !";
+            return str;
         }
     }
-    
+
+    public partial class PartialClass1
+    {
+        partial void DisplayX();
+        public void Info()
+        {
+            DisplayX();
+        }
+
+        public int x { get; set; }
+    }
+
+    public partial class PartialClass1
+    {
+        partial void DisplayX()
+        {
+            Console.WriteLine("Value = {0}", x);
+        }
+    }
+
+    public class Tools
+    {
+        public static void Func1(int x = 10, int y = 20, string str = "Hello World")
+        {
+            Console.WriteLine("{0} {1} {2}", x, y, str);
+        }
+        public static void Add100(ref int x)
+        {
+            x += 100;
+        }
+
+        public static void GetPi(out double x)
+        {
+            x = 3.1415129265359;
+        }
+        public static void PrintAll(params string[] msg)
+        {
+            foreach (string str in msg)
+            {
+                Console.Write(str);
+                Console.Write(" ");
+            }
+            Console.WriteLine();
+        }
+        public static void PrintTypes(params Object[] objects)
+        {
+            for (int i = 0; i != objects.Length; ++i)
+            {
+                Object aParam = objects[i];
+                Console.WriteLine(aParam.GetType());
+            }
+        }
+    }
+
+    public class Employee
+    {
+        public string Name;
+        public int Age;
+    }
+
+    public class Employee2
+    {
+        private string _name;
+        private int _age;
+
+        public string GetName()
+        {
+            return _name;
+        }
+
+        public void SetName(string value)
+        {
+            _name = value;
+        }
+
+        public int GetAge()
+        {
+            return _age;
+        }
+
+        public void SetAge(int age)
+        {
+            if (age < 0 || age > 120)
+            {
+                throw new ArgumentOutOfRangeException("age", age, "Value is out of range");
+            }
+            _age = age;
+        }
+    }
+
+    public class Employee3
+    {
+        private string _name;
+        private int _age;
+        public string Name
+        {
+            get { return _name; }
+            set { _name = value; }
+        }
+
+        public int Age
+        {
+            get { return _age; }
+            set
+            {
+                if (value < 0 || value > 120)
+                {
+                    throw new ArgumentOutOfRangeException("value", value, "Value is out of range");
+                }
+                _age = value;
+            }
+        }
+    }
+
+    public class Employee4
+    {
+        public string Name { get; set; }
+        public int Age { get; set; }
+    }
+
+    public class MyArray
+    {
+        public MyArray(int size)
+        {
+            _size = size;
+            _data = new String[_size];
+        }
+
+        public String this[int pos]
+        {
+            get
+            {
+                return _data[pos];
+            }
+
+            set
+            {
+                _data[pos] = value;
+            }
+        }
+
+        private String[] _data;
+        private int _size;
+    }
+
+    public class Person
+    {
+        private string _name;
+        public string Name
+        {
+            get { return _name; }
+            protected set { _name = value; }
+        }
+        //...
+    }
+
+    public class PersonArgs : EventArgs
+    {
+        private string _name;
+        private int _age;
+
+        public PersonArgs(string name, int age)
+        {
+            _name = name;
+            _age = age;
+
+        }
+        public string Name
+        {
+            get { return _name; }
+        }
+
+        public int Age
+        {
+            get { return _age; }
+        }
+    }
+
+    public class PersonManager
+    {
+        public event EventHandler<PersonArgs> _NewPerson;
+        //...
+
+#if COMMENT
+        public delegate void EventHandler<TEVentArgs>(Object sender, TEVentArgs e);
+        void MethodName(Object sender, PersonArgs e);
+#endif
+        protected virtual void OnNewPerson(PersonArgs e)
+        {
+            e.Raise(this, ref _NewPerson);
+        }
+
+        public void CreateAPerson(string name, int age)
+        {
+            PersonArgs e = new PersonArgs(name, age);
+            OnNewPerson(e);
+        }
+    }
+
+    public static class PersonArgExtensioon
+    {
+        public static void Raise<TEventArgs>(this TEventArgs e, Object sender, ref EventHandler<TEventArgs> eventDelegate)
+        {
+            EventHandler<TEventArgs> temp = Volatile.Read(ref eventDelegate);
+            if (temp != null)
+            {
+                temp(sender, e);
+            }
+
+        }
+    }
+
+    public class PMHandler
+    {
+        private void Pm__NewPerson(object sender, PersonArgs e)
+        {
+            Console.WriteLine("{0} {1}", e.Name, e.Age);
+        }
+
+        public void Process()
+        {
+            PersonManager pm = new PersonManager();
+            pm._NewPerson += Pm__NewPerson;
+            pm.CreateAPerson("Edith", 17);
+        }
+    }
+
+    public class MyListString : List<String>
+    {
+    }
+
+    public class MyArray<T>
+    {
+        public MyArray(int size)
+        {
+            _data = new T[size];
+        }
+
+        public T this[int index]
+        {
+            get { return _data[index]; }
+            set { _data[index] = value; }
+        }
+
+        // ...
+
+        private T[] _data;
+    }
+
+    public interface IEnumerator<T> : IDisposable, System.Collections.IEnumerator
+    {
+        T Current { get; }
+    }
+
+    public class AType1
+    {
+        public delegate TReturn CallMe<TReturn, TKey, TValue>(TKey key, TValue value);
+    }
+
+    public class PrivateAffector<T>
+    {
+        private T _value;
+
+        public void SetValue<K>(T TValue, K KValue)
+        {
+            Console.WriteLine("{0}", KValue);
+            _value = TValue;
+        }
+
+        public void DisplayValue()
+        {
+            Console.WriteLine("{0}", _value);
+        }
+    }
+
+    public interface MyWork
+    {
+        bool DoWork();
+    }
+
+    public class MyWorkerStuff<T> where T : MyWork
+    {
+        T _data;
+
+        public MyWorkerStuff() { }
+
+        public void Process(T obj)
+        {
+            obj.DoWork();
+        }
+
+    }
+
+    public class MyWorkEx : MyWork
+    {
+        public MyWorkEx() { }
+        public bool DoWork()
+        {
+            Console.WriteLine("MyWorkEx::DoWork");
+            return true;
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Hello World !");
+            TypeC1 a = new TypeC1();
+            TypeC1 b = new TypeC1();
+            a.x = 10;
+            b.x = 20;
+            TypeC1 c = a + b;
+            Console.WriteLine("c={0}", c.x);
 
-            // ...
-    try
-    {
-        Object o = new object();
-        TypeA a0 = (TypeA)o;
-    }
-    catch( Exception ex)
-    {
-        Console.WriteLine("{0}", ex.GetType());
-    }
+            TypeC1 c1 = new TypeC1();
+            c1.x = 100;
+            TypeD1 d = new TypeD1(c1);
+            Console.WriteLine("d={0}", d.y);
 
-    TypeB b1 = new TypeB();
-    b1.i = 10;
-    b1.j = 20;
-    TypeA a1 = (TypeA)b1;
-    Console.WriteLine("{0} {1}", a1.i, b1.j);
+            TypeD1 d1 = 10;
+            Console.WriteLine("d1={0}", d1.y);
+            int i1 = (Int32)d1;
+            Console.WriteLine("i1={0}", i1);
 
-    TypeB b2 = new TypeB();
-    bool bres1 = b2 is TypeA; // True
-    Console.WriteLine(bres1);
-    bool bres2 = b2 is Object;
-    Console.WriteLine(bres2); // True
-    TypeA a3 = new TypeA();
-    bool bres3 = a3 is TypeB;
-    Console.WriteLine(bres3); // False
+            string str = "any data";
+            Console.WriteLine("value:{0}", str.GetCheetCode());
 
-    TypeA a4 = new TypeA();
-    TypeB b4 = (a4 as TypeB);
-    if( b4 == null )
-        Console.WriteLine("b4 is null");
+            PartialClass1 pc1 = new PartialClass1();
+            pc1.x = 100;
+            pc1.Info();
 
+            Tools.Func1();
+            Tools.Func1(20, 100, "Papa Piche");
+            Tools.Func1(x: 10, y: 20);
+            Tools.Func1(x: 10);
+            Tools.Func1(str: "Maggie coquine !");
 
+            int x1 = 5;
+            Tools.Add100(ref x1);
+            Console.WriteLine(x1); // 105
+
+            double y1;
+            Tools.GetPi(out y1);
+            Console.WriteLine(y1); // 3.1415129565359
+
+            Tools.PrintAll("Edith", "Lisa", "Maggie");
+            Tools.PrintAll("Je", "vous", "aime", "les filles !");
+            /*
+            Edith Lisa Maggie
+            Je vous aime les filles !
+            */
+            
+            Tools.PrintTypes("Edith", 17, "Dijon");
+            /*
+            System.String
+            System.Int32
+            System.String
+            */
+
+            Employee e1 = new Employee();
+            e1.Name = "Christophe Pichaud";
+            e1.Age = 45;
+
+            Employee2 e2 = new Employee2();
+            e2.SetName("Lisa Pichaud Castany");
+            e2.SetAge(14);
+
+            Employee3 e3 = new Employee3();
+            e3.Name = "Maggie la tornade";
+            e3.Age = 9;
+            //e3.Age = -10; // Exception !
+
+            Employee4 e4 = new Employee4();
+            e4.Name = "Edith";
+            e4.Age = 17;
+
+            Employee4 a4 = new Employee4() { Name = "Papy Jean-Marc", Age = 65 };
+            Employee4 b4 = new Employee4() { Name = "Mamy Mireille", Age = 67 };
+
+            var p1 = new { Price = 1.5f, Name = "Cocal Cola 1.5L" };
+            Console.WriteLine("Price={0}, Name={1}", p1.Price, p1.Name);
+
+            MyArray mya1 = new MyArray(10);
+            mya1[0] = "Edith";
+            mya1[1] = "Lisa";
+            mya1[2] = "Maggie";
+            Console.WriteLine(mya1[2]);
+
+            PMHandler pmh = new PMHandler();
+            pmh.Process();
+
+            List<String> filles = new List<String>();
+            filles.Add("Edith");
+            filles.Add("Lisa");
+            filles.Add("Maggie");
+            Console.WriteLine(filles.Count);
+
+            List<int> ages = new List<int>();
+            ages.Add(17);
+            ages.Add(14);
+            ages.Add(9);
+
+            MyArray<string> mesFilles = new MyArray<string>(3);
+            mesFilles[0] = "Edith";
+            mesFilles[1] = "Lisa";
+            mesFilles[2] = "Maggie";
+            Console.WriteLine(mesFilles[2]);
+
+            PrivateAffector<string> pa1 = new PrivateAffector<string>();
+            pa1.SetValue<int>("hello world", 100);
+            pa1.DisplayValue();
+            pa1.SetValue<string>("hello world", "the world of C!");
+            pa1.DisplayValue();
+
+            MyWorkerStuff<MyWorkEx> a1 = new MyWorkerStuff<MyWorkEx>();
+            MyWorkEx w1 = new MyWorkEx();
+            a1.Process(w1);
         }
+
     }
 }
