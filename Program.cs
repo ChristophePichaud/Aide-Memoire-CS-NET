@@ -345,11 +345,11 @@ namespace ConsoleApp1
         bool DoWork();
     }
 
-    public class MyWorkerStuff<T> where T : MyWork
+    public class MyWorkerStuff<T> where T : MyWork, new()
     {
         T _data;
 
-        public MyWorkerStuff() { }
+        //public MyWorkerStuff() { }
 
         public void Process(T obj)
         {
@@ -368,8 +368,207 @@ namespace ConsoleApp1
         }
     }
 
+    public interface IProcess
+    {
+        bool Process();
+    }
+
+    public interface IProcess2<T>
+    {
+        T Item { get; }
+        bool Process(T t);
+    }
+
+    public interface IMyEnumerator<T>
+    {
+        T Get_Item();
+    }
+
+    public interface IMyCollection<T> : IMyEnumerator<T>
+    {
+        int Count { get; }
+        void Add(T item);
+        void Clear();
+        bool Contains(T item);
+        bool Remove(T item);
+    }
+
+    public class MyCollection<T> : IMyCollection<T>, IMyEnumerator<T>
+    {
+        public int Count => throw new NotImplementedException();
+
+        public void Add(T item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Clear()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Contains(T item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public T Get_Item()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Remove(T item)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class MyCollection2<T> : IMyCollection<T>, IMyEnumerator<T>
+    {
+        int IMyCollection<T>.Count => throw new NotImplementedException();
+
+        void IMyCollection<T>.Add(T item)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IMyCollection<T>.Clear()
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IMyCollection<T>.Contains(T item)
+        {
+            throw new NotImplementedException();
+        }
+
+        T IMyEnumerator<T>.Get_Item()
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IMyCollection<T>.Remove(T item)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class DelegateSample1
+    {
+        public static void Init()
+        {
+            Action<string> fn1 = Process;
+            fn1("Hello Maggie !");
+        }
+
+        public static void Process(string str)
+        {
+            Console.WriteLine("Message: {0}", str);
+        }
+    }
+
+    public class DelegateSample2
+    {
+        public static void Init()
+        {
+            Func<string, bool> fn1 = Process;
+            bool ret = fn1("Hello Maggie !");
+        }
+
+        public static bool Process(string str)
+        {
+            Console.WriteLine("Message: {0}", str);
+            return true;
+        }
+    }
+
+    /*
+
+    public struct Nullable<T> where T : struct
+    {
+        public Nullable(T value);
+        public bool HasValue { get; }
+        public T Value { get; }
+        public override bool Equals(object other);
+        public override int GetHashCode();
+        public T GetValueOrDefault();
+        public T GetValueOrDefault(T defaultValue);
+        public override string ToString();
+        public static implicit operator T?(T value);
+        public static explicit operator T(T? value);
+    }
+     */
+
+    enum Shape
+    {
+        Rectangle,  // 0
+        Ellipse,    // 1
+        Line        // 2
+    }
+
+    class DrawingStuff
+    {
+        public static void Draw(Shape shape)
+        {
+            if (shape == Shape.Rectangle)
+            {
+                Console.WriteLine("Dessine un Rectangle");
+            }
+            else { }
+        }
+    }
+
+    [Flags]
+    enum Permission
+    {
+        Read    = 0x00000001,
+        Write   = 0x00000002,
+        Append  = 0x00000004,
+        Other   = 0x00000008
+    }
+
+    class Product1
+    {
+        public delegate void Feedback(int val);
+
+        public void Count(int from, int to, Feedback routine)
+        {
+            for (int i = from; i < to; i++)
+            {
+                if (routine != null)
+                {
+                    routine(i);
+                }
+            }
+        }
+    }
+    class Product2
+    {
+        public void Feedback(int val)
+        {
+            Console.WriteLine("val:{0}", val);
+        }
+
+        public void Count(int from, int to, Action<int> routine)
+        {
+            for (int i = from; i < to; i++)
+            {
+                if (routine != null)
+                {
+                    routine(i); // eq. routine.Invoke(i);
+                }
+            }
+        }
+    }
+
+
     class Program
     {
+        public static void myFeedback(int val) 
+        { 
+            Console.WriteLine("val:{0}", val); 
+        }
+
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World !");
@@ -483,6 +682,54 @@ namespace ConsoleApp1
             MyWorkerStuff<MyWorkEx> a1 = new MyWorkerStuff<MyWorkEx>();
             MyWorkEx w1 = new MyWorkEx();
             a1.Process(w1);
+
+            DelegateSample1.Init();
+            DelegateSample2.Init();
+
+            DrawingStuff.Draw(Shape.Rectangle);
+
+            Permission perms = Permission.Read | Permission.Write;
+
+            Int32? in1 = 100;
+            if (in1.HasValue)
+            {
+                Console.WriteLine("i={0}", in1);
+            }
+
+            Nullable<int> ni1 = 10;
+            int valni1 = ni1.Value;
+
+            Int32? in2 = null;
+
+
+            Product1 product1 = new Product1();
+            product1.Count(0, 3, myFeedback);
+
+            Product2 product2 = new Product2();
+            Action<int> fn = product2.Feedback;
+            product2.Count(0, 4, fn);
+
+            int a10 = 10;
+            if (a10 == 10)
+                throw new Exception("a10 == 10 !");
+
+            int a0 = 10;
+            while (a0 > 2)
+            {
+	            try
+	            {
+		            ++a0;
+	            }
+	            catch (Exception ex)
+	            {
+                    Console.WriteLine("Erreur générale... plantage ! Message:{0}", ex.Message);
+	            }
+	            catch
+	            {
+                    Console.WriteLine("Erreur générale... plantage !"););
+                }
+            }
+
         }
 
     }
