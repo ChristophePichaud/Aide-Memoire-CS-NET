@@ -6,11 +6,18 @@ using System.Data.Linq;
 using System.Data.Linq.Mapping;
 using System.IO;
 using System.IO.Compression;
+using System.IO.MemoryMappedFiles;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
+using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 using ListString = System.Collections.Generic.List<string>;
 
 namespace ConsoleApp1
@@ -569,7 +576,7 @@ namespace ConsoleApp1
     }
 
 
-    class Program
+    public class Program
     {
         public static void myFeedback(int val) 
         { 
@@ -1233,12 +1240,12 @@ namespace ConsoleApp1
 
             //FileAttributes 
             FileInfo fi1 = new FileInfo("DataCompressed1.dat");
-            Console.WriteLine("{0} {1} {2} {3} {4} {5}", 
-                fi1.Name, 
-                fi1.FullName, 
-                fi1.DirectoryName, 
-                fi1.Directory.Name, 
-                fi1.Extension, 
+            Console.WriteLine("{0} {1} {2} {3} {4} {5}",
+                fi1.Name,
+                fi1.FullName,
+                fi1.DirectoryName,
+                fi1.Directory.Name,
+                fi1.Extension,
                 fi1.Length);
 
             DirectoryInfo di1 = new DirectoryInfo(@"d:\dev\web\ultrafluid.net");
@@ -1249,12 +1256,258 @@ namespace ConsoleApp1
 
             foreach (DriveInfo dri1 in DriveInfo.GetDrives())
             {
-                Console.WriteLine("{0} {1} {2} {3}", 
-                    dri1.Name, 
-                    dri1.DriveType, 
-                    dri1.RootDirectory, 
+                Console.WriteLine("{0} {1} {2} {3}",
+                    dri1.Name,
+                    dri1.DriveType,
+                    dri1.RootDirectory,
                     dri1.TotalSize);
             }
+
+            using (MemoryMappedFile mmFile =
+                MemoryMappedFile.CreateNew("SharedSpace", 1024))
+            {
+                using (MemoryMappedViewAccessor accessor =
+                    mmFile.CreateViewAccessor())
+                {
+                    accessor.Write(0, 100);
+
+                    byte[] data1 = Encoding.UTF8.GetBytes("Ma belle Lisa");
+                    accessor.Write(4, data1.Length);
+                    accessor.WriteArray(8, data1, 0, data1.Length);
+                    MyData mydata1 = new MyData() { X = 9, Y = 14 };
+                    accessor.Write(8 + data1.Length, ref mydata1);
+
+                    // This can run in a separate EXE:
+                    MemoryMappedFile mmFile2 =
+                        MemoryMappedFile.OpenExisting("SharedSpace");
+                    MemoryMappedViewAccessor accessor2 =
+                        mmFile.CreateViewAccessor();
+                    int data = accessor2.ReadInt32(0); // 100
+                    Console.WriteLine(data);
+
+                    byte[] data3 = new byte[accessor2.ReadInt32(4)];
+                    accessor2.ReadArray(8, data3, 0, data3.Length);
+                    string strData = Encoding.UTF8.GetString(data3);
+                    Console.WriteLine(strData);
+                    MyData mydata2 = new MyData();
+                    accessor2.Read(8 + data3.Length, out mydata2);
+                    Console.WriteLine("X:{0} Y:{1}",
+                        mydata2.X, mydata2.Y);
+                }
+            }
+
+            TheProduct tp1 = new TheProduct();
+            tp1.Name = "XBox One";
+            tp1.Price = 330;
+
+            DataContractSerializer dcs = new DataContractSerializer(typeof(TheProduct));
+            using (Stream stp1 = File.Create("theproduct1.xml"))
+            {
+                dcs.WriteObject(stp1, tp1);
+            }
+
+            TheProduct tp2;
+            using (Stream stp2 = File.OpenRead("theproduct1.xml"))
+            {
+                tp2 = (TheProduct)dcs.ReadObject(stp2);
+            }
+            Console.WriteLine("TheProduct {0} {1}", tp2.Name, tp2.Price);
+
+            DataContractSerializer dcs2 = new DataContractSerializer(typeof(TheProduct));
+            XmlWriterSettings xws = new XmlWriterSettings() { Indent = true };
+            using (XmlWriter xw1 = XmlWriter.Create("theproduct2.xml", xws))
+            {
+                dcs2.WriteObject(xw1, tp1);
+            }
+
+            TheEmployee te1 = new TheEmployee();
+            te1.Name = "Maggie";
+            te1.Age = 9;
+
+            // Serilisation XML
+            DataContractSerializer dcs3 = new DataContractSerializer(typeof(TheEmployee));
+            using (XmlWriter xw2 = XmlWriter.Create("maggie.xml", xws))
+            {
+                dcs3.WriteObject(xw2, te1);
+            }
+
+            TheBasket tb1 = new TheBasket();
+            tb1.CustomerName = "Pic l'American";
+            tb1.NumberofItems = 10;
+            tb1.TotalPrice = 525;
+
+            IFormatter ift = new BinaryFormatter();
+            using (FileStream stp1 = File.Create("thebasket1.bin"))
+            {
+                ift.Serialize(stp1, tb1);
+            }
+
+            TheBasket tb2;
+            using (FileStream stp2 = File.OpenRead("thebasket1.bin"))
+            {
+                tb2 = (TheBasket)ift.Deserialize(stp2);
+            }
+            Console.WriteLine("TheBasket {0} {1} {2}", 
+                tb2.CustomerName, 
+                tb2.NumberofItems, 
+                tb2.TotalPrice);
+
+
+            TheRoom tro1 = new TheRoom();
+            tro1.ChildName = "Lisa";
+            tro1.NumberOfGames = 5;
+            tro1.Surface = 12;
+
+            IFormatter ift2 = new BinaryFormatter();
+            using (FileStream stp1 = File.Create("theroom1.bin"))
+            {
+                ift2.Serialize(stp1, tro1);
+            }
+            
+            TheRoom tro2;
+            using (FileStream stp2 = File.OpenRead("theroom1.bin"))
+            {
+                tro2 = (TheRoom)ift.Deserialize(stp2);
+            }
+            Console.WriteLine("TheRoom {0} {1} {2}",
+                tro2.ChildName,
+                tro2.NumberOfGames,
+                tro2.Surface);
+
+            SoccerPlayer sp1 = new SoccerPlayer();
+            sp1.Age = 32;
+            sp1.Name = "Leo Messi";
+
+            XmlSerializer xs1 = new XmlSerializer(typeof(SoccerPlayer));
+            using (Stream stp1 = File.Create("soccerplayer1.xml"))
+            {
+                xs1.Serialize(stp1, sp1);
+            }
+
+            SoccerPlayer sp2;
+            using (Stream stp2 = File.OpenRead("soccerplayer1.xml"))
+            {
+                sp2 = (SoccerPlayer) xs1.Deserialize(stp2);
+            }
+            Console.WriteLine("SoccerPlayer {0} {1}", sp2.Name, sp2.Age);
+
+            SoccerPlayer2 spl2 = new SoccerPlayer2();
+            spl2.Age = 34;
+            spl2.Name = "Christinao Ronaldo";
+
+            XmlSerializer xs2 = new XmlSerializer(typeof(SoccerPlayer2));
+            using (Stream stp1 = File.Create("soccerplayer2.xml"))
+            {
+                xs2.Serialize(stp1, spl2);
+            }
+        }
+
+        public class TheAddress : IXmlSerializable
+        {
+            public string Street;
+            public string PostCode;
+            public XmlSchema GetSchema() { return null; }
+            public void ReadXml(XmlReader reader)
+            {
+                reader.ReadStartElement();
+                Street = reader.ReadElementContentAsString("Street", "");
+                PostCode = reader.ReadElementContentAsString("PostCode", "");
+                reader.ReadEndElement();
+            }
+            public void WriteXml(XmlWriter writer)
+            {
+                writer.WriteElementString("Street", Street);
+                writer.WriteElementString("PostCode", PostCode);
+            }
+        }
+
+        public class SoccerPlayer2
+        {
+            [XmlElement("PlayerName")] 
+            public string Name;
+            
+            [XmlAttribute("PlayerAge")]
+            public int Age;
+        }
+
+        public class SoccerPlayer
+        {
+            public string Name;
+            public int Age;
+        }
+
+        [Serializable]
+        class TheRoom : ISerializable
+        {
+            public string ChildName;
+            public int Surface;
+            public int NumberOfGames;
+
+            public void GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                info.AddValue("ChildName", ChildName);
+                info.AddValue("Surface", Surface);
+                info.AddValue("Games", NumberOfGames);
+
+            }
+
+            protected TheRoom(SerializationInfo info, StreamingContext context)
+            {
+                ChildName = info.GetString("ChildName");
+                Surface = info.GetInt32("Surface");
+                NumberOfGames = info.GetInt32("Games");
+            }
+
+            public TheRoom()
+            { }
+        }
+
+
+        [Serializable]
+        class TheBasket
+        {
+            public string CustomerName;
+            public int NumberofItems;
+            public int TotalPrice;
+
+            [NonSerialized]
+            public int Shipping;
+
+            [OptionalField(VersionAdded = 2)]
+            public string Currency;
+        }
+
+        [DataContract(Name ="Employee", Namespace ="http://www.dunod.com/aide-memoire")]
+        class TheEmployee
+        {
+            [DataMember(Name="FirstLastName")]
+            public string Name;
+
+            [DataMember(Name ="YearsOld")]
+            public int Age;
+
+            [OnSerializing]
+            void BeforeSerialize(StreamingContext sc)
+            {
+                if (Name == "Maggie")
+                    Name = "Audrey";
+            }
+        }
+
+        [DataContract]
+        class TheProduct
+        {
+            [DataMember]
+            public string Name;
+
+            [DataMember]
+            public int Price;
+        }
+
+        struct MyData
+        {
+            public int X;
+            public int Y;
         }
 
         public static void Dump(IEnumerable<string> e)
