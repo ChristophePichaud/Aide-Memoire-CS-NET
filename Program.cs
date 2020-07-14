@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Data.Common;
 using System.Data.Linq;
 using System.Data.Linq.Mapping;
@@ -8,9 +9,16 @@ using System.IO;
 using System.IO.Compression;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Mail;
+using System.Net.Security;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Policy;
 using System.Text;
 using System.Threading;
@@ -583,7 +591,8 @@ namespace ConsoleApp1
             Console.WriteLine("val:{0}", val); 
         }
 
-        static void Main(string[] args)
+        //static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.WriteLine("Hello World !");
             TypeC1 a = new TypeC1();
@@ -1256,11 +1265,15 @@ namespace ConsoleApp1
 
             foreach (DriveInfo dri1 in DriveInfo.GetDrives())
             {
-                Console.WriteLine("{0} {1} {2} {3}",
+                //Console.WriteLine("{0} {1} {2} {3}",
+                //    dri1.Name,
+                //    dri1.DriveType,
+                //    dri1.RootDirectory,
+                //    dri1.TotalSize);
+                Console.WriteLine("{0} {1} {2}",
                     dri1.Name,
                     dri1.DriveType,
-                    dri1.RootDirectory,
-                    dri1.TotalSize);
+                    dri1.RootDirectory);
             }
 
             using (MemoryMappedFile mmFile =
@@ -1347,9 +1360,9 @@ namespace ConsoleApp1
             {
                 tb2 = (TheBasket)ift.Deserialize(stp2);
             }
-            Console.WriteLine("TheBasket {0} {1} {2}", 
-                tb2.CustomerName, 
-                tb2.NumberofItems, 
+            Console.WriteLine("TheBasket {0} {1} {2}",
+                tb2.CustomerName,
+                tb2.NumberofItems,
                 tb2.TotalPrice);
 
 
@@ -1363,7 +1376,7 @@ namespace ConsoleApp1
             {
                 ift2.Serialize(stp1, tro1);
             }
-            
+
             TheRoom tro2;
             using (FileStream stp2 = File.OpenRead("theroom1.bin"))
             {
@@ -1387,7 +1400,7 @@ namespace ConsoleApp1
             SoccerPlayer sp2;
             using (Stream stp2 = File.OpenRead("soccerplayer1.xml"))
             {
-                sp2 = (SoccerPlayer) xs1.Deserialize(stp2);
+                sp2 = (SoccerPlayer)xs1.Deserialize(stp2);
             }
             Console.WriteLine("SoccerPlayer {0} {1}", sp2.Name, sp2.Age);
 
@@ -1400,6 +1413,722 @@ namespace ConsoleApp1
             {
                 xs2.Serialize(stp1, spl2);
             }
+
+            IPAddress ipa1 = new IPAddress(new byte[] { 172, 22, 32, 1 }); ;
+            Console.WriteLine(ipa1.AddressFamily);
+            IPAddress ipa2 = IPAddress.Parse("172.22.32.1");
+            Console.WriteLine(ipa2.AddressFamily);
+            IPAddress ipa3 = IPAddress.Parse("fe80::d8d0:5ae8:d9:81c0%31");
+            Console.WriteLine(ipa3.AddressFamily);
+
+            IPAddress ipa4 = IPAddress.Parse("172.22.32.1");
+            IPEndPoint ep = new IPEndPoint(ipa4, 8080);
+            Console.WriteLine(ep.ToString()); // 172.22.32.1:8080
+            Uri uri1 = new Uri("http://www.windowscpp.com:80/PDF");
+            Console.WriteLine("{0} {1}", uri1.AbsoluteUri, uri1.ToString());
+
+            //WebClient wc1 = new WebClient() { Proxy = null };
+            //wc1.DownloadFile("http://windowscpp.com/PDF/239.pdf", "Interview.pdf");
+            ////System.Diagnostics.Process.Start("Interview.pdf");
+
+            //WebRequest wr1 = WebRequest.Create("http://windowscpp.com/PDF/238.pdf");
+            //wr1.Proxy = null;
+            //using (WebResponse wresp1 = wr1.GetResponse())
+            //{
+            //    using (Stream strw1 = wresp1.GetResponseStream())
+            //    {
+            //        using (FileStream fstrw1 = File.Create("devMS.pdf"))
+            //        {
+            //            strw1.CopyTo(fstrw1);
+            //        }
+            //    }
+            //}
+            ////System.Diagnostics.Process.Start("devMS.pdf");
+
+            //await Program.CallHttpClient();
+
+            WebClient wc2 = new WebClient() { Proxy = null };
+            wc2.BaseAddress = "ftp://ftp.christophepichaud.com/ultrafluid.net/Appz/";
+            string user = "chris21";
+            string password = "ch010974";
+            wc2.Credentials = new NetworkCredential(user, password);
+            //wc2.DownloadFile("UFM.zip", "UFM.zip");
+
+            //WebClient wc3 = new WebClient() { Proxy = null };
+            //string wc3data = wc3.DownloadString("http://www.windowscpp.com");
+            //foreach (string name in wc3.ResponseHeaders.Keys)
+            //{
+            //    Console.WriteLine("{0}:{1}", name, wc3.ResponseHeaders[name]);
+            //}
+
+            /*
+            X-Powered-By-Plesk:PleskWin
+            Content-Length:112841
+            Cache-Control:private
+            Content-Type:text/html; charset=utf-8
+            Date:Mon, 29 Jun 2020 23:28:24 GMT
+            Server:Microsoft-IIS/10.0
+            X-AspNet-Version:4.0.30319
+            X-Powered-By:ASP.NET
+            */
+
+            //WebClient wc4 = new WebClient() { Proxy = null };
+            //wc4.QueryString.Add("q", "Microsoft");
+            //wc4.QueryString.Add("hl", "en");
+            //wc4.DownloadFile("http://www.google.com/search", "results.html");
+            ////System.Diagnostics.Process.Start("results.html");
+
+            WebClient wc5 = new WebClient() { Proxy = null };
+            NameValueCollection nvc = new NameValueCollection();
+            nvc.Add("FirstName", "Christophe");
+            nvc.Add("LastName", "Pichaud");
+            nvc.Add("Email", "christophep@cpixxi.com");
+            //byte[] result = wc5.UploadValues("http://www.somesite.net/Download.aspx", "POST", nvc);
+            //Console.WriteLine(Encoding.UTF8.GetString(result));
+
+            CookieContainer cc1 = new CookieContainer();
+            HttpWebRequest req1 = (HttpWebRequest)WebRequest.Create("http://www.google.com");
+            req1.Proxy = null;
+            req1.CookieContainer = cc1;
+            using (HttpWebResponse response = (HttpWebResponse)req1.GetResponse())
+            {
+                foreach (Cookie cookie in response.Cookies)
+                {
+                    Console.WriteLine("Name:{0} Value:{1} Path:{2} Domain:{3}",
+                        cookie.Name,
+                        cookie.Value,
+                        cookie.Path,
+                        cookie.Domain);
+                }
+            }
+            /*
+            Name:1P_JAR Value:2020-06-29-23 Path:/ Domain:.google.com
+            Name:NID Value:204=TpXvLCFHGJvvO4X2S4h6FVwZuZ4GoVlbGsNk5AO6Svb9oQtC6E6aJ5ML8u2OgYwv4ZhVaC_XTk9lQO6-CI5m9so-TLAkMHPBcRXfKhkaRboeBpix1rMsDhDwZbf5gOEgQTjN-2fdRGJ8ZH1gNPIFKeavPXdZAFHnWHcB5a098mQ Path:/ Domain:.google.com
+            */
+
+            ConfigureSSL();
+
+            //CreateServer();
+            //WebClient wc6 = new WebClient();
+            //string wc6data = wc6.DownloadString("http://localhost:51000/MyServer/app1.txt");
+            //Console.WriteLine(wc6data);
+            //// /MyServer/app1.txt
+
+            //SendEmail("christophep@cpixxi.com");
+
+            Thread thread1 = new Thread(Routine1);
+            thread1.Start();
+            thread1.Join();
+            Console.WriteLine("Thread1 finished...");
+
+            ThreadClass1.Main();
+
+            MyClass1 myclass1 = new MyClass1();
+            myclass1.age = 14;
+            myclass1.name = "Lisa";
+            ParameterizedThreadStart pts = new ParameterizedThreadStart(Routine2);
+            Thread thread2 = new Thread(pts);
+            thread2.Start(myclass1);
+            thread2.Join();
+
+            Thread thread3 = new Thread(() => Console.WriteLine("Hello Lisa"));
+            thread3.Priority = ThreadPriority.Normal;
+            thread3.Start();
+            thread3.Join();
+
+            ManualResetEvent event1 = new ManualResetEvent(false);
+            event1.Set();
+
+            Thread thread4 = new Thread(() =>
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    Console.WriteLine("Hello Lisa");
+                }
+                event1.WaitOne();
+            });
+            thread4.Start();
+            thread4.Join();
+
+            event1.Set();
+
+            ThreadPool.QueueUserWorkItem(m => {
+                for (int i = 0; i < 10; i++)
+                {
+                    Console.WriteLine("Hello Maggie");
+                }
+            });
+
+            Task task1 = Task.Run(() => { Console.WriteLine("Une petite routine..."); });
+            task1.Wait();
+
+            Task<int> task2 = Task.Run(() => 
+            { 
+                Console.WriteLine("Une petite routine...");
+                return 10;
+            });
+            task2.Wait();
+            int resultT2 = task2.Result;
+            Console.WriteLine(resultT2);
+
+            Task task3 = Task.Run(() => 
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    Console.WriteLine("Hello Lisa");
+                }
+            }); 
+            Task task4 = task3.ContinueWith( m => 
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    Console.WriteLine("Hello Maggie");
+                }
+            });
+            task4.Wait();
+
+            await Routine3();
+            Task<int> ageLisa = Routine4();
+
+            Func<Task> ftask1 = async () =>
+            {
+                await Task.Delay(200);
+                Console.WriteLine("Hello Maggie!");
+            };
+
+            await ftask1();
+
+            Func<Task<int>> ftask2 = async () =>
+            {
+                await Task.Delay(200);
+                int a9 = 9;
+                return a9;
+            };
+
+            int ageMaggie = await ftask2();
+
+
+            Func<Task> ft1 = async () =>
+            { await Task.Delay(200);  Console.WriteLine("ft1");};
+            Func<Task> ft2 = async () =>
+            { await Task.Delay(300); Console.WriteLine("ft2"); };
+            Func<Task> ft3 = async () =>
+            { await Task.Delay(50); Console.WriteLine("ft3"); };
+
+            Task twait1 = await Task.WhenAny(ft1(), ft2(), ft3());
+            await Task.WhenAll(ft1(), ft2(), ft3());
+
+            //MessageBox(IntPtr.Zero, "Hello !", "Warning", 0);
+
+            StringBuilder cName = new StringBuilder(255);
+            int rName = 255;
+            GetComputerNameW(cName, ref rName);
+            Console.WriteLine(cName); // DESKTOP-7VJOH39
+
+            EnumWindows(DisplayWindow, IntPtr.Zero);
+            /*
+            C:\WINDOWS\system32\cmd.exe
+            AutoCompleteProxy
+            ConsoleApp1 - Microsoft Visual Studio
+            GetWindowTextW function (winuser.h) - Win32 apps | Microsoft Docs - Google Chrome
+            C# 7.0 in a Nutshell - Adobe Reader
+            AutoCorrect Options
+            Aide-Mémoire C# NET.docx - Word
+            Android Messages
+            SystemResourceNotifyWindow
+            Michel HUBERT | Microsoft Teams             
+            */
+
+            /*
+            SystemTime st1 = new SystemTime();
+            GetSystemTime(st1);
+            Console.Write("{0}:{1}:{2}.{3}", st1.Hour, st1.Minute, st1.Second, st1.Milliseconds);
+
+            Timer timer1 = new Timer(TimerCallback, null, 0, 100);
+            Task.Delay(1000).Wait();
+
+            for (int i = 0; i < 5; i++)
+            {
+                Thread th = new Thread(ThreadRoutine1);
+                th.Start(i);
+            }
+            Task.Delay(1000).Wait();
+
+            for (int i = 0; i < 3; i++)
+            {
+                Thread th = new Thread(ThreadRoutineA);
+                th.Start(i);
+            }
+            Task.Delay(2000).Wait();
+            */
+
+            int a10 = 10;
+            if (a10 % 10 == 0)
+                Console.WriteLine("Modulo 10 ...");
+            if (a10 % 2 == 0)
+            {
+                Console.WriteLine("Modulo 2 ...");
+            }
+
+            string nameTeuteute = "Maggie";
+            if (nameTeuteute == "Edith")
+            {
+                Console.WriteLine("Salut Didou");
+            }
+            else if (nameTeuteute == "Lisa")
+            {
+                Console.WriteLine("Salut Le Mini-Mini");
+            }
+            else if( nameTeuteute == "Maggie" )
+            {
+                Console.WriteLine("Salut Méga Teuteute de l'amour !");
+            }
+            else
+            {
+                Console.WriteLine("On ne passera jamais dans le else car je n'ai que 3 filles !");
+            }
+
+
+            FuncAge(9);
+
+            FuncWhile();
+            FuncDoWhile();
+            FuncFor();
+            FuncForeach();
+            FuncGoto();
+            FuncThrow(new Product1());
+
+            FuncReflection();
+            FuncReflection2();
+            FuncReflection3();
+        }
+
+        static void FuncReflection3()
+        {
+            Assembly asm = Assembly.LoadFrom(@"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\System.Xml.dll");
+            foreach (Type type in asm.GetTypes())
+            {
+                Console.WriteLine("{0}", type.FullName);
+            }
+            /*
+            ../..
+            System.Xml.XmlReader
+            System.Xml.XmlReaderSettings
+            System.Xml.XmlSpace
+            System.Xml.XmlSubtreeReader
+            System.Xml.XmlTextEncoder
+            System.Xml.BinaryCompatibility
+            System.Xml.XmlTextReader
+            System.Xml.XmlTextReaderImpl
+            System.Xml.Formatting
+            System.Xml.XmlTextWriter
+            System.Xml.XmlUtf8RawTextWriter
+            System.Xml.XmlUtf8RawTextWriterIndent
+            System.Xml.XmlValidatingReader
+            System.Xml.XmlValidatingReaderImpl
+            System.Xml.XmlWellFormedWriter
+            System.Xml.XmlWrappingReader
+            System.Xml.XmlWrappingWriter
+            System.Xml.WriteState
+            System.Xml.XmlWriter
+            System.Xml.XmlOutputMethod
+            System.Xml.TriState
+            System.Xml.XmlStandalone
+            System.Xml.XmlWriterSettings
+            System.Xml.CachingEventHandler
+            ../..
+            */
+        }
+
+        static void FuncReflection2()
+        {
+            Type type1 = Assembly.GetExecutingAssembly().GetType("ConsoleApp1.Product1");
+            Console.WriteLine("{0}", type1.Name);
+            Console.WriteLine("{0}", type1.FullName);
+            Console.WriteLine("{0}", type1.Assembly);
+            Console.WriteLine("{0}", type1.Module);
+
+            /*
+            Product1
+            ConsoleApp1.Product1
+            ConsoleApp1, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+            ConsoleApp1.exe
+            */
+        }
+
+        static void FuncReflection()
+        {
+            Type type1 = DateTime.Now.GetType();
+            Console.WriteLine("{0}", type1.Name);
+            Console.WriteLine("{0}", type1.FullName);
+            Console.WriteLine("{0}", type1.Assembly);
+            Console.WriteLine("{0}", type1.Module);
+
+            /*
+            DateTime
+            System.DateTime
+            mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
+            CommonLanguageRuntimeLibrary
+            */
+        }
+
+        static void FuncThrow(Product1 product1)
+        {
+            if (product1 == null)
+                throw new ArgumentNullException("Product1 is null");
+
+            try
+            {
+                // Use the product...
+            }
+            catch (Exception ex)
+            {
+                throw; // throw the inner exception
+            }
+        }
+
+        static void FuncGoto()
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                for (int j = 0; j < 5; j++)
+                {
+                    Console.WriteLine("{0}, {1}", i, j);
+
+                    if (i == 3 && j == 4)
+                    {
+                        goto end;
+                    }
+                }
+            }
+
+            end:
+            Console.WriteLine("End!");
+        }
+
+        static void FuncForeach()
+        {
+            List<string> filles = new List<string>() { "Didou", "Lisa", "Maggie" };
+            foreach (string fille in filles)
+            {
+                Console.WriteLine(fille);
+            }
+        }
+
+        static void FuncFor()
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                Console.WriteLine(i);
+            }
+        }
+
+        static void FuncWhile()
+        {
+            int count = 4;
+            while (count > 0)
+            {
+                Console.WriteLine(count);
+                count--;
+            }
+        }
+
+        static void FuncDoWhile()
+        {
+            int count = 4;
+            do
+            {
+                Console.WriteLine(count);
+                count--;
+            }
+            while (count > 0);
+        }
+
+        static void FuncAge(int age)
+        {
+            switch (age)
+            {
+                case 9:
+                case 10:
+                    Console.WriteLine("ça c'est l'âge à Maggie !");
+                    break;
+                case 14:
+                    Console.WriteLine("ça c'est ma Lisa !");
+                    break;
+                case 17:
+                    Console.WriteLine("ça c'est ma Didou !");
+                    break;
+                default:
+                    Console.WriteLine("L'âge trouvé ne match pas chez mes filles...");
+                    break;
+            }
+        }
+
+        static string threadValueA;
+        static Mutex mutexA = new Mutex();
+        static void ThreadRoutineA(object i)
+        {
+            int count = 0;
+            while (true)
+            {
+                count++;
+                Console.WriteLine("ThreadRoutineReadA... ");
+                mutexA.WaitOne();
+                threadValueA = DateTime.Now.ToString();
+                Console.WriteLine("threadValueA {0}", threadValueA);
+                mutexA.ReleaseMutex();
+                Thread.Sleep(100);
+                if (count > 20)
+                {
+                    break;
+                }
+            }
+        }
+
+
+        static string threadValue;
+        static ReaderWriterLockSlim rwlock = new ReaderWriterLockSlim();
+
+        static void ThreadRoutineRead(object i)
+        {
+            while (true)
+            {
+                int ival = (int)i;
+                Console.WriteLine("ThreadRoutineRead... {0}", ival++);
+                rwlock.EnterReadLock();
+                string data = String.Format("ThreadRoutineRead... {0}", threadValue);
+                rwlock.ExitReadLock();
+                Thread.Sleep(100);
+                if (ival > 20)
+                {
+                    break;
+                }
+            }
+        }
+
+        static void ThreadRoutineWrite(object i)
+        {
+            while (true)
+            {
+                int ival = (int)i;
+                Console.WriteLine("ThreadRoutineRead... {0}", ival++);
+                rwlock.EnterWriteLock();
+                threadValue = String.Format("ThreadRoutineRead... {0}", DateTime.Now.ToString());
+                rwlock.ExitWriteLock();
+                Thread.Sleep(100);
+                if (ival > 20)
+                {
+                    break;
+                }
+            }
+        }
+
+        static SemaphoreSlim sem1 = new SemaphoreSlim(3);
+
+        static void ThreadRoutine1(object i)
+        {
+            Console.WriteLine("ThreadRoutine1... {0}", i);
+            sem1.Wait();
+            Thread.Sleep(500);
+            sem1.Release();
+        }
+
+        static int count = 0;
+        private static void TimerCallback(object state)
+        {
+            Console.WriteLine($"{count}");
+            count++;
+        }
+
+        [ComVisible(true), Guid("30041F7C-109B-4DB4-9352-1664F2E8F4E4")]
+        public interface IMath
+        {
+            int Add(int i, int j);
+            int Multiply(int i, int j);
+        }
+
+        [ComVisible(true), Guid("30041F7C-109B-4DB4-9352-1664F2E8F4E2"), ClassInterface(ClassInterfaceType.None)]
+        [ComDefaultInterface(typeof(IMath))]
+        public class CoClass1 : IMath
+        {
+            public int Add(int i, int j)
+            {
+                return i + j;
+            }
+
+            public int Multiply(int i, int j)
+            {
+                return i * j;
+            }
+        }
+
+        [DllImport("kernel32.dll")]
+        static extern void GetSystemTime(SystemTime t);
+
+        [StructLayout(LayoutKind.Sequential)]
+        class SystemTime
+        {
+            public ushort Year;
+            public ushort Month;
+            public ushort DayOfWeek;
+            public ushort Day;
+            public ushort Hour;
+            public ushort Minute;
+            public ushort Second;
+            public ushort Milliseconds;
+        }
+
+        static bool DisplayWindow(IntPtr hWnd, IntPtr lParam)
+        {
+            StringBuilder cText = new StringBuilder(255);
+            GetWindowTextW(hWnd, cText, 255);
+            Console.WriteLine(cText);
+            return true;
+        }
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        static extern int GetWindowTextW(IntPtr hWnd, StringBuilder sb, int maxChars);
+
+        delegate bool EnumWindowsCallBack(IntPtr hWnd, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        static extern int EnumWindows(EnumWindowsCallBack lpENumProc, IntPtr lParam);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        static extern int GetComputerNameW(StringBuilder sb, ref int maxChars);
+
+        [DllImport("user32.dll")]
+        static extern int MessageBox(IntPtr hWnd, string text, string caption, int type);
+
+        async static Task<int> Routine4()
+        {
+            await Task.Delay(200);
+            int age = 14;
+            return age;
+        }
+
+        async static Task Routine3()
+        {
+            await Task.Run( () =>
+            {
+                for (int i= 0; i < 10; i++)
+                {
+                    Console.WriteLine("Hello Edith");
+                }
+            });
+        }
+
+        class MyClass1
+        {
+            public int age;
+            public string name;
+        }
+
+        static void Routine2(Object obj1)
+        {
+            MyClass1 myclass1 = (MyClass1)obj1;
+            for (int i = 0; i < 10; i++)
+            {
+                Console.Write("{0} {1} {2}", i % 2,
+                    myclass1.age,
+                    myclass1.name);
+            }
+        }
+
+        static int g_i = 0;
+        static Object objLock;
+
+        static void Routine1()
+        {
+            for (int i = 0; i < 1024; i++)
+            {
+                Console.Write("{0} ", i%16);
+            }
+            Console.WriteLine();
+            //Thread.Sleep(2000);
+        }
+
+        static void SendEmail(string toRecipient)
+        {
+            string subject = "NewsLetter UltraFluid Modeler BETA2 - Mai 2020";
+            string body = "the message..............";
+
+            try
+            {
+                MailAddress toAddress = new MailAddress(toRecipient, toRecipient);
+                MailAddress fromAddress = new MailAddress("christophep@cpixxi.com", "Christophe Pichaud");
+                string user = "f5fd32998ff0c81595353782932b450a";
+                string fromPassword = "5a8b19f8ed88d87e69140a8e415e796f";
+                string smtpServer = "in-v3.mailjet.com";
+
+                SmtpClient smtp = new SmtpClient(smtpServer, 587);
+                smtp.EnableSsl = true;
+                smtp.UseDefaultCredentials = false;
+                //smtp.Credentials = new NetworkCredential(fromAddress.Address, fromPassword);
+                smtp.Credentials = new NetworkCredential(user, fromPassword);
+                smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+
+                MailMessage message = new MailMessage(fromAddress, toAddress);
+                message.IsBodyHtml = true;
+                message.Subject = subject;
+                message.Body = body;
+                MailAddress meAddress = new MailAddress("christophep@buildonthemetal.com", "Christophe Pichaud");
+                message.Bcc.Add(meAddress);
+
+                smtp.Send(message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Exception: {0}", e.Message);
+            }
+        }
+
+        class ThreadClass1
+        {
+            public static void Main()
+            {
+                ThreadClass1 tc1 = new ThreadClass1();
+                Thread run = new Thread(tc1.Run);
+                run.Start();
+                run.Join();
+            }
+
+            void Run()
+            {
+                for (int i = 0; i < 512; i++)
+                {
+                    Console.Write("{0} ", i % 16);
+                }
+                Console.WriteLine();
+            }
+        }
+
+
+        async static void CreateServer()
+        {
+            HttpListener hl1 = new HttpListener();
+            hl1.Prefixes.Add("http://localhost:51000/MyServer/");
+            hl1.Start();
+
+            HttpListenerContext hlc = await hl1.GetContextAsync();
+            Console.WriteLine(hlc.Request.RawUrl);
+        }
+
+        static void ConfigureSSL()
+        {
+            ServicePointManager.ServerCertificateValidationCallback = CertificateCheck;
+
+        }
+
+        private static bool CertificateCheck(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors errors)
+        {
+            return true;
+        }
+
+        async static Task CallHttpClient()
+        {
+            string html = await new HttpClient().GetStringAsync("http://www.ultrafluid.net/");
+            Console.WriteLine(html);
         }
 
         public class TheAddress : IXmlSerializable
